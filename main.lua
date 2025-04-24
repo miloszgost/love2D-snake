@@ -1,5 +1,5 @@
 --[[
-20-22/04/2025
+20-24/04/2025
 Milosz Gostynski
 Simple 'Snake' Game using Lua (in Love2D)
 --]]
@@ -25,24 +25,35 @@ function love.load()
         score = {
             x = 100,
             y = 100,
-            fontsize = 25 
+            font = love.graphics.setNewFont(25) 
+        },
+        stats = {
+            x = 100,
+            y = 140,
+            font = love.graphics.setNewFont(15)
         },
         gameover = {
             x = width/2,
             y = height/2,
-            fontsize = 40
+            font = love.graphics.setNewFont(40)
         },
         repr = function(self, gamestate)
             love.graphics.setColor(1,1,1)
-            set_x = self.gameover.x - self.gameover.fontsize*5
-            set_y = self.gameover.y - self.gameover.fontsize*5
+            set_x = self.gameover.x - 40*5
+            set_y = self.gameover.y - 40*5
             if gamestate == "gameover" then
-                love.graphics.setNewFont(self.gameover.fontsize)
+                love.graphics.setFont(self.gameover.font)
                 love.graphics.print("GAME OVER\nPress 'r' to restart\nPress 'Esc' to exit", set_x, set_y, 0)
             end
-                love.graphics.setNewFont(self.score.fontsize)
-                -- arguments for print(): text,                        x,y,angle,scale_x,scale_y
-                love.graphics.print(string.format("Score: %d", score), self.score.x, self.score.y, 0)
+            love.graphics.setFont(self.score.font)
+            -- arguments for print(): text,                        x,y,angle,scale_x,scale_y
+            love.graphics.print(string.format("Score: %d", score), self.score.x, self.score.y, 0)
+                
+            love.graphics.setFont(self.stats.font)
+            delta   = love.timer.getAverageDelta()
+            fps     = love.timer.getFPS()
+            love.graphics.print(string.format("AvgDelta: %f\nFPS: %d", delta, fps), self.stats.x, self.stats.y, 0)
+
         end
     }
 
@@ -65,10 +76,10 @@ function love.load()
             for i, bodypart in ipairs(move_record) do
                 -- draw last moves 
                 if #move_record-i < score then
-                    love.graphics.circle(bodypart[1], bodypart[2], bodypart[3], bodypart[4])
+                    love.graphics.circle("fill", bodypart[1], bodypart[2], snake.radius)
                     love.graphics.setColor(1, 1, 1)
-                    love.graphics.setNewFont(text.score.fontsize)
-                    love.graphics.print(#move_record-i+1, bodypart[2], bodypart[3])
+                    love.graphics.setFont(text.score.font)
+                    love.graphics.print(#move_record-i+1, bodypart[1], bodypart[2])
                     love.graphics.setColor(1, 0, 0)
                 end
             end
@@ -152,7 +163,7 @@ function love.update(dt)
         -- update snake:
         --  save previous move
         if love.keyboard.isDown('w', 's', 'a', 'd') then
-            table.insert(move_record, {"fill", snake.x, snake.y, snake.radius})
+            table.insert(move_record, {snake.x, snake.y})
         end
         --  update current move
         if love.keyboard.isDown('w') then
@@ -169,9 +180,9 @@ function love.update(dt)
         for i=1, score-1 do
             bodypart = move_record[#move_record-i]
             
-            temp_x = bodypart[2]
-            temp_y = bodypart[3]
-            if (snake.x == bodypart[2] and snake.y == bodypart[3]) then
+            temp_x = bodypart[1]
+            temp_y = bodypart[2]
+            if (snake.x == temp_x and snake.y == temp_y) then
                 gamestate = "gameover"
                 break
             else
@@ -185,6 +196,9 @@ function love.update(dt)
         -- update score(length) and food 
         if food:is_eaten() then
             score = score + 1
+            if #move_record > score then
+                table.remove(move_record, 1)
+            end
             food:new_position()
         end
     end
