@@ -35,14 +35,17 @@ function love.load()
         gameover = {
             x = width/2,
             y = height/2,
-            font = love.graphics.setNewFont(40)
+            font = love.graphics.setNewFont("CharterBT-Bold.ttf", 40)
         },
-        repr = function(self, gamestate)
+        draw = function(self, gamestate)
             love.graphics.setColor(1,1,1)
             set_x = self.gameover.x - 40*5
             set_y = self.gameover.y - 40*5
             if gamestate == "gameover" then
+                love.graphics.setColor(0.5, 0.5, 0.5)
+                love.graphics.polygon("fill", set_x, set_y, set_x+400, set_y, set_x+400, set_y+200, set_x, set_y+200)
                 love.graphics.setFont(self.gameover.font)
+                love.graphics.setColor(1, 1, 1)
                 love.graphics.print("GAME OVER\nPress 'r' to restart\nPress 'Esc' to exit", set_x, set_y, 0)
             end
             love.graphics.setFont(self.score.font)
@@ -61,7 +64,7 @@ function love.load()
         x = width/2,
         y = height/2,
         radius = 25,
-        repr = function(x, y, radius)
+        draw = function(x, y, radius)
             -- draw head
             love.graphics.setColor(1, 0, 0)
             love.graphics.circle("fill", x, y, radius)
@@ -103,7 +106,7 @@ function love.load()
         x = 0,
         y = 0,
         radius = 25,
-        repr = function(x, y, radius)
+        draw = function(x, y, radius)
             love.graphics.setColor(1, 1, 0)
             love.graphics.circle("line", x, y, radius)
         end
@@ -141,9 +144,9 @@ function love.draw()
         end 
     end
     
-    text:repr(gamestate)
-    snake.repr(snake.x, snake.y, snake.radius)
-    food.repr(food.x, food.y, food.radius)
+    snake.draw(snake.x, snake.y, snake.radius)
+    food.draw(food.x, food.y, food.radius)
+    text:draw(gamestate)
 end
 
 function love.update(dt)
